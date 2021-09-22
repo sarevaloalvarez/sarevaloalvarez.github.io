@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Welcome to Steve's site using Jekyll!"
+title:  "Roll some dice while you're here!"
 date:   2021-09-17 18:01:43 +0000
 categories: jekyll update
 ---
