@@ -20,7 +20,7 @@ categories: jekyll update
     
         <h1>Dice Roll</h1>
        
-        <input type="button" value='Roll Dice' onclick='playTurn();sumRolls++'>
+        <input type="button" value='Roll Dice' onclick='playTurn();'>
      
         <canvas id='myCanvas' width='450px' height='450px'></canvas>
         <script>
