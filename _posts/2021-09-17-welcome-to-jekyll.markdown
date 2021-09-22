@@ -7,359 +7,207 @@ categories: jekyll update
 
 <html>
     <head>
-        <title>Warehouse Scene</title>
-        <style>
-            canvas{
-                border: 1px solid black;
-            }
-        </style>
-    </head>
-    <body onload='initialize()'>
-        <canvas id='Cutscene' width='1024px' height='500 px'></canvas> 
-    </body>
-    <script>
-        var canvas,ctx;
-        var bgrd=new Image();
-        bgrd.src='AcmeWarehouse.png';
-        var bgrdX;
-        var cat= new Image();
-        cat.src='cat_ar_base.png';
-        var robot=new Image();
-        robot.src='robosheet.png';
-        var monster=new Image();
-        monster.src='monster.png';
-        var catX,catY,catFrameX,catFrameY,catFrameW,catFrameH;
-        var robotX,robotY,robotFrameX,robotFrameY,robotFrameW,robotFrameH;
-        var monsterX,monsterY,monsterFrameX,monsterFrameY,monsterFrameW,monsterFrameH;
-        var robotFrameCount;
-        var catFrameCount;
-        var monsterFrameCount;
-        var timing;
-        function initialize(){
-            canvas=document.getElementById('Cutscene');
-            ctx=canvas.getContext('2d');
-            bgrdX=10;
-            catX=20;catY=372;catFrameX=0;catFrameY=3;catFrameW=64;catFrameH=64;
-            catFrameCount=8;
-            robotX=1924;robotY=372;robotFrameX=0;robotFrameY=0;robotFrameW=55; robotFrameH=88;
-            robotFrameCount=3;
-            monsterX=-100;monsterY=-100;monsterFrameX=0; monsterFrameY=1;monsterFrameW=64;monsterFrameH=64;
-            monsterFrameCount=4;
-            timing=0;
-
-            update();
-           
-        }
-        function update(){
-            timing++;
-            console.log(timing);
-            //0-5 sec
-            if(timing<300){
-                if(timing%6==0){
-                    catFrameX++;
-                    bgrdX+=4;
-                    robotX-=4;
+       <title>Game Of Pig</title>
+       <style>
+           canvas{
+            border: 2px dashed black;
+           }
+       </style>
+       
+         
+    </head> 
+    <body>
+        <script>
+            class Player{
+                constructor(name,points=0){
+                    this.name=name;
+                    this.points=points;
+                    this.rpoints=0;
                 }
-               
+
+                add(points){
+                 this.points+=points;
+                }
+                subtract(){
+                    this.points-=this.rpoints;
+                    this.rpoints=0;
+                }
+                turnPoints(rpoints){
+                    this.rpoints+=rpoints;
+                }
+
+                zero(){
+                    this.points=0;
+                }
             }
-            //5-9 sec
-            if(timing>300 && timing<540){ 
-                catFrameY=1;
-                if(timing%6==0){
-                   
-                    catFrameX++;
+            var rollcnt=0;
+            var turns=1;
+            var highestScore=0;
+            var sumScore=0;
+            var mostRolls=0;
+            var sumRolls=0;
+            var player1= new Player('user ');
+            var player2= new Player('computer');
+            var players=[];
+            players.push(player1);
+            players.push(player2);
+        </script>
+        <h1>The Game of Pig</h1>
+        <h2>Game Rules</h2>
+        <h3>The object: to be the first to score 100 points or more.</h3>
+        <h3>How to play: Players take turns rolling two dice and following these rules:</h3>
+        <p>On a turn, a player may roll the dice as many times as he or she wants, keeping a running total of the sums that come up. When the player stops rolling, he or she records the total and adds it to the scores from previous rounds.
+            But, if a 1 comes up on one of the dice before the player decides to stop rolling, the player scores 0 for that round and it's the next player's turn.
+            Even worse, if a 1 comes up on both dice, not only does the turn end, but the player's entire accumulated total returns to 0.</p>   
+        <p id="showTurn"></p>
+        <p id="endMessage"></p>
+        <input type="button" value='Roll Dice' onclick='playTurn();sumRolls++'>
+        <input type="button" value="End Turn" onclick='compTurn()'>
+        <canvas id='myCanvas' width='450px' height='450px'></canvas>
+        <script>
+            function playTurn(){ 
+                    rollcnt++; 
+                    players[1].rpoints=0;
+                    var dice=roll();//dice has 3 indices first 2 for roll and 3rd for the sum
+                    if (dice[2]==2){
+                        players[0].zero();
+                        rollcnt=0;
+                        setTimeout(compTurn,1000);
+                    }
+                        else if(dice[0]==1 || dice[1]==1){
+                            players[0].subtract();
+                            rollcnt=0;
+                            setTimeout(compTurn,1000);
+                        }   
+                            else {
+                            players[0].add(dice[2]);
+                            sumScore+=players[0].rpoints;
+                            players[0].turnPoints(dice[2]);
+                            }
+                    if(players[0].rpoints>highestScore){
+                        highestScore=players[0].rpoints;
+                    }
                     
-                }
-                
-            }
-            //9-15 sec
-            if(timing>540 && timing<900){
-                catFrameY=3;
-                if(timing%6==0){
+                    if(rollcnt>mostRolls){
+                        mostRolls=rollcnt;
+                    }
+                    draw(dice);
+                    importantText(0);
                     
-                    catFrameX++;
-                    bgrdX+=14;
-                    robotX-=14;
-                    catX+=5;
+            }
+            function compTurn(){
+                turns++;
+                players[0].rpoints=0;
+                document.getElementById("showTurn").innerText=players[1].name+"'s turn";
+                var randRolls=Math.floor(Math.random()*10);
+                for(var compRolls=0;compRolls<randRolls;compRolls++){
+                    var dice=roll();//dice has 3 indices first 2 for roll and 3rd for the sum
+                    setTimeout(draw,1000,dice);
+                    if (dice[2]==2){
+                            players[1].zero();
+                            sumRolls+=compRolls;
+                            compRolls=100;
+                            importantText(0);
+                    }
+                            else if(dice[0]==1 || dice[1]==1){
+                                players[1].subtract();
+                                sumRolls+=compRolls;
+                                compRolls=100;
+                                importantText(0);
+                            }   
+                                else {
+                                    players[1].add(dice[2]);
+                                    sumScore+=players[1].rpoints;
+                                    players[1].turnPoints(dice[2]);
+                                }
+                    if(compRolls>mostRolls){
+                        mostRolls=comRolls;
+                    }
                 }
-            }
-            //15-17 sec
-            if(timing>900 && timing<1020){
-                if(timing%6==0){
-                    catX+=7;
-                    catFrameX++;
+                if(players[1].rpoints>highestScore){
+                    highestScore=players[1].rpoints;
                 }
-            }
-            //17-21 sec
-            if(timing > 1020 && timing<1260){
-                catFrameY=1;
-                if(timing%6==0){
-
-                    catFrameX++;
+                if (compRolls<100){
+                    sumRolls+=compRolls;
                 }
-            }
-            //21-29 sec
-            if (timing>1260 && timing<1740){
-                catFrameY=3;
-                if(timing%6==0){
-
-                    catFrameX++;
-                    catX+=5;
-                }
-            }
-            //29-30 sec
-            if(timing>1740 && timing<1800){
-                catFrameY=1;
-                if(timing%6==0){
-                    catFrameX++;
-                }
-            }
-            if(timing==1800){
-                catFrameCount=4;
-                catFrameX=3;
-            }
-            //30-30.4 sec
-            if (timing>1800 && timing<1824){
+                turns++;
+                importantText(1);
                 
-                catFrameY=0;
-                if(timing%6==0){
-                    catFrameX--;
-                }
             }
-            //30.4-33.6 sec
-            if (timing >1824 && timing<2016){
-                //text
+            function importantText(p){
+                if(players[p].points>=100){
+                        document.getElementById("showTurn").innerText=players[p].name+" has won! ";
+                        document.getElementById('endMessage').innerText=highestScore+" was the highest round score. "+(sumScore/turns)+" was the average score. "+mostRolls+" was the most rolls in a turn. "+(sumRolls/turns)+" was the average rolls in a turn.";
+                    }
+                    else{
+                        document.getElementById("showTurn").innerText=players[p].name+"'s turn";
+                    }
             }
-            //33.6-34 sec
-            if(timing>2016 && timing<2040){
-                if(timing%6==0){
-                    catFrameX++;
-                }
-            }
-            if(timing==2040){
-                catFrameCount=10;
-                catFrameY=5;
-                catFrameX=0;
-            }
-            //34-35 sec
-            if(timing>2040 && timing<2100){
-
-                
-                if(timing%6==0){
-                    catFrameX++;
-                    catX-=6;
-                }
-                switch (catFrameX){
-                    case 0:
-                    case 1:
-                    case 2:
+           function draw(dice){
+                var canvas= document.getElementById('myCanvas');
+                var ctx=canvas.getContext('2d');
+                ctx.beginPath();
+                ctx.clearRect(0,0,500,500);
+                ctx.rect(35,35,200,200);
+                ctx.rect(135,245,200,200);
+                ctx.stroke();
+                ctx.translate(135,135);
+                drawFace(ctx,dice[0]);
+                ctx.translate(100,210);
+                drawFace(ctx,dice[1]);
+                ctx.fillText(players[0].name+": "+players[0].points,65,-305);
+                ctx.fillText(players[1].name+": "+players[1].points,65,-325);
+                ctx.translate(-235,-345);
+                ctx.closePath();
+           }
+           function drawFace(ctx,die){
+                ctx.beginPath();
+                switch(die){
+                    case 5:
+                        ctx.arc(-60,60,20,0,2*Math.PI);
+                        ctx.moveTo(60,-60);
+                        ctx.arc(60,-60,20,0,2*Math.PI);
+                        ctx.moveTo(60,60);
                     case 3:
-                    catY-=2;break;
-                    case 4:
-                    catY-=1;break;
-                    case 5: 
-                    catY+=1;break;
-                    case 6:
-                    case 7:
-                    case 8:
-                    case 9:
-                    catY+=2;
-                }
-            }
-            if (timing==2100){
-                catFrameCount=8;
-                catFrameY=1;
-                robotFrameY=1;
-                catFrameX=0;
-            }
-            //35-45 sec
-            if (timing>2100 && timing<2700){
-                if(timing%8==0){
-                    catFrameX++;
-                    robotFrameX++;
-                }
-            }
-            if(timing==2700){
-                catFrameY=3;
-                robotFrameY=2;
-                monsterX=0;
-                monsterY=372;
-            }
-            //45-50 sec
-            
-            if(timing>2700 && timing<3000){
-                if(timing%6==0){
-                    catFrameX++
-                    catX+=8;
-                    robotFrameX++;
-                    robotX-=8;
-                    monsterFrameX++;
-                    monsterX+=5;
+                        ctx.arc(60,60,20,0,2*Math.PI);
+                        ctx.moveTo(-60,-60);
+                        ctx.arc(-60,-60,20,0,2*Math.PI);
+                        ctx.moveTo(0,0);
                     
+                    case 1:
+                        ctx.arc(0,0,20,0,2*Math.PI);
+                        ctx.fill();
+                        ctx.stroke();
+                        break;
+                    case 6:
+                        ctx.arc(-60,0,20,0,2*Math.PI);
+                        ctx.moveTo(60,0);
+                        ctx.arc(60,0,20,0,2*Math.PI);
+                        ctx.moveTo(-60,60);
+                    case 4:
+                        ctx.arc(-60,60,20,0,2*Math.PI);
+                        ctx.moveTo(60,-60);
+                        ctx.arc(60,-60,20,0,2*Math.PI);
+                        ctx.moveTo(60,60); 
+                    case 2:
+                        ctx.arc(60,60,20,0,2*Math.PI);
+                        ctx.moveTo(-60,-60);
+                        ctx.arc(-60,-60,20,0,2*Math.PI);
+                        ctx.fill();
+                        ctx.stroke();
+                    }
+                    
+           }
+            function roll(){
+                var dice=[];
+                for(var i=0;i<2;i++){
+                    var rand=Math.floor(Math.random()*6)+1;
+                    dice.push(rand);
                 }
+                dice.push(dice[0]+dice[1]);
+                return dice;
             }
-            if(timing==3000){
-                robotFrameY=3;
-                robotFrameCount=6;
-            }
-            //50-51.8 sec
-            if(timing>3000 && timing<3108){
-                if(timing%6==0){
-                    robotFrameX++;
-                    monsterFrameX++;
-                    monsterX+=5;
-                }
-            }
-            if(timing==3108){
-                robotFrameY=1;
-                robotFrameCount=3;
-                monsterFrameY=3;
-                monsterFrameCount=7;
-                monsterFrameX=0;
-            }
-            //51.8-52.5 sec
-            if(timing>3108 && timing<3150){
-                if(timing%6==0){
-                    robotFrameX++;
-                    monsterFrameX++
-                }
-            }
-            if(timing==3150){
-                monsterX=-100;
-                monsterY=-100;
-            }
-            //52.5-60 sec
-            if(timing>3150 && timing<3600){
-                if(timing%6==0)
-                    robotFrameX++;
-            }
-            if(catFrameX==catFrameCount)
-                catFrameX=0;
-            if (robotFrameX==robotFrameCount)
-                robotFrameX=0;
-            if (monsterFrameX==monsterFrameCount)
-                monsterFrameX=0;
-            draw();
-            requestAnimationFrame(update);
-        }
-        function draw(){
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-             ctx.drawImage(bgrd,bgrdX,10,2048,500,0,0,2048,500);
-             ctx.drawImage(robot,robotFrameX*robotFrameW,robotFrameY*robotFrameH,robotFrameW,robotFrameH,robotX,robotY,robotFrameW+12,robotFrameH+20);
-             ctx.drawImage(cat,catFrameX*catFrameW,catFrameY*catFrameH,catFrameW,catFrameH,catX,catY,128,128);
-             if(timing>300 && timing<540){
-                 ctx.rect(0,0,canvas.width,100);
-                 ctx.fillStyle='black';
-                 ctx.fill();
-                 ctx.drawImage(cat,0,0,catFrameW,catFrameH,-20,-20,128,128);
-                 ctx.fillStyle='white';
-                 ctx.font = "30px Comic Sans MS";
-                 ctx.fillText("Woah, What's That?",150,50);
-             }
-             if(timing>900 && timing<1020){
-                ctx.rect(0,0,canvas.width,100);
-                ctx.fillStyle='black';
-                ctx.fill();
-                ctx.drawImage(cat,0,0,catFrameW,catFrameH,-20,-20,128,128);
-                ctx.fillStyle='white';
-                ctx.font = "30px Comic Sans MS";
-                ctx.fillText("It looks like a robot.",150,50);
-             }
-             if(timing >= 1020 && timing<1260){
-                ctx.rect(0,0,canvas.width,100);
-                ctx.fillStyle='black';
-                ctx.fill();
-                ctx.drawImage(cat,0,0,catFrameW,catFrameH,-20,-20,128,128);
-                ctx.fillStyle='white';
-                ctx.font = "30px Comic Sans MS";
-                ctx.fillText("I think I can get it to work.",150,50);
-             }
-             if(timing >1824 && timing<2016){
-                ctx.rect(0,0,canvas.width,100);
-                ctx.fillStyle='black';
-                ctx.fill();
-                ctx.drawImage(robot,0,0,robotFrameW,robotFrameH,0,0,96,96);
-                ctx.fillStyle='white';
-                ctx.font = "30px Comic Sans MS";
-                ctx.fillText("*CLINK*  *CLUNK*  *CLINK*",150,50);
-             }
-             //2100-2700
-             if (timing>2100 && timing<=2220){
-                ctx.rect(0,0,canvas.width,100);
-                ctx.fillStyle='black';
-                ctx.fill();
-                ctx.drawImage(robot,0,0,robotFrameW,robotFrameH,0,0,96,96);
-                ctx.fillStyle='white';
-                ctx.font = "30px Comic Sans MS";
-                ctx.fillText("POWER ON",150,50);   
-             }
-             if (timing>2220 && timing<=2340){
-                ctx.rect(0,0,canvas.width,100);
-                ctx.fillStyle='black';
-                ctx.fill();
-                ctx.drawImage(cat,0,0,catFrameW,catFrameH,-20,-20,128,128);
-                ctx.fillStyle='white';
-                ctx.font = "30px Comic Sans MS";
-                ctx.fillText("How long have you been here?",150,50);
-             }
-             if (timing>2340 && timing<=2460){
-                ctx.rect(0,0,canvas.width,100);
-                ctx.fillStyle='black';
-                ctx.fill();
-                ctx.drawImage(robot,0,0,robotFrameW,robotFrameH,0,0,96,96);
-                ctx.fillStyle='white';
-                ctx.font = "30px Comic Sans MS";
-                ctx.fillText("I've been left deactiviated for around 15 years",150,50);
-             }
-             if (timing>2460 && timing<=2580){
-                ctx.rect(0,0,canvas.width,100);
-                ctx.fillStyle='black';
-                ctx.fill();
-                ctx.drawImage(robot,0,0,robotFrameW,robotFrameH,0,0,96,96);
-                ctx.fillStyle='white';
-                ctx.font = "30px Comic Sans MS";
-                ctx.fillText("My creator must have left me here to rust",150,50);
-             }
-             if (timing>2580 && timing<=2700){
-                ctx.rect(0,0,canvas.width,100);
-                ctx.fillStyle='black';
-                ctx.fill();
-                ctx.drawImage(cat,0,0,catFrameW,catFrameH,-20,-20,128,128);
-                ctx.fillStyle='white';
-                ctx.font = "30px Comic Sans MS";
-                ctx.fillText("15 years is about how long this mess has been going on.",150,50);
-             }
-             if (timing>2700 && timing<=3000){
-                ctx.rect(0,0,canvas.width,100);
-                ctx.fillStyle='black';
-                ctx.fill();
-                ctx.drawImage(cat,0,0,catFrameW,catFrameH,-20,-20,128,128);
-                ctx.fillStyle='white';
-                ctx.font = "30px Comic Sans MS";
-                ctx.fillText("OH NO! THERES TOO MANY!! RUN!!!",150,50);
-             }
-             //3150-3600
-             if (timing>=3150 && timing<=3300){
-                ctx.rect(0,0,canvas.width,100);
-                ctx.fillStyle='black';
-                ctx.fill();
-                ctx.drawImage(robot,0,0,robotFrameW,robotFrameH,0,0,96,96);
-                ctx.fillStyle='white';
-                ctx.font = "30px Comic Sans MS";
-                ctx.fillText("I'm well aware of how long this chaos has been going on",150,50);
-             }
-             if (timing>3300 && timing<=3600){
-                ctx.rect(0,0,canvas.width,100);
-                ctx.fillStyle='black';
-                ctx.fill();
-                ctx.drawImage(robot,0,0,robotFrameW,robotFrameH,0,0,96,96);
-                ctx.fillStyle='white';
-                ctx.font = "30px Comic Sans MS";
-                ctx.fillText("My creator started it and I need your help to stop it",150,50);
-             }
-             for(var i=0;i<3;i++){
-                ctx.drawImage(monster,monsterFrameX*monsterFrameW,monsterFrameY*monsterFrameH,monsterFrameW,monsterFrameH,monsterX-i*64,monsterY, 96,96);
-             }
-        }
-    </script>
+            
+        </script>
+    </body>
 </html>
