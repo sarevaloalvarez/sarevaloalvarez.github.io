@@ -43,8 +43,7 @@ categories: jekyll update
                 drawFace(ctx,dice[0]);
                 ctx.translate(100,210);
                 drawFace(ctx,dice[1]);
-                ctx.fillText(players[0].name+": "+players[0].points,65,-305);
-                ctx.fillText(players[1].name+": "+players[1].points,65,-325);
+                
                 ctx.translate(-235,-345);
                 ctx.closePath();
            }
